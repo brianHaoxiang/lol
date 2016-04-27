@@ -14,6 +14,7 @@ import com.haoxiaz.lol.api.LolDataService;
 import com.haoxiaz.lol.api.RiotKey;
 import com.haoxiaz.lol.model.Champion;
 import com.haoxiaz.lol.model.ChampionMap;
+import com.haoxiaz.lol.search.Trie;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,11 +35,13 @@ public class HeroGridFragment extends Fragment {
     GridView heroGrid;
     HeroGridAdapter heroAdapter;
     List<Champion> champions;
+    Trie<Champion> trie;
     private OnHeroClickListener onHeroClickListener;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d("haoxiang","HeroGrid create view");
+        trie = new Trie<>();
         View layout = inflater.inflate(R.layout.hero_grid_layout, container, false);
         heroGrid = (GridView) layout.findViewById(R.id.hero_grid_view);
         heroGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -59,7 +62,9 @@ public class HeroGridFragment extends Fragment {
             public void onResponse(Call<ChampionMap> call, Response<ChampionMap> response) {
                 champions = new ArrayList<>();
                 for (String key : response.body().data.keySet()) {
-                    champions.add(response.body().data.get(key));
+                    Champion champion = response.body().data.get(key);
+                    champions.add(champion);
+                    trie.insert(champion.getName(), champion);
                 }
                 heroAdapter = new HeroGridAdapter(getActivity(), champions);
                 heroGrid.setAdapter(heroAdapter);
@@ -83,13 +88,11 @@ public class HeroGridFragment extends Fragment {
             return;
         }
 
-        List<Champion> newList = new ArrayList<>();
-        for (Champion champion : champions) {
-            if (champion.getName().toLowerCase().contains(search)) {
-                newList.add(champion);
-            }
-        }
-
+        List<Champion> newList = trie.startsWithList(search);
         heroAdapter.setChampionList(newList);
+
+        if (newList.size()==0) onHeroClickListener.onHeroClick(null);
+        else onHeroClickListener.onHeroClick(heroAdapter.getItem(0));
+
     }
 }

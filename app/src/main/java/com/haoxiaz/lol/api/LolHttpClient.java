@@ -15,12 +15,13 @@ public final class LolHttpClient {
 
     public static String get() {
         Request request = new Request.Builder()
-                .url("https://global.api.pvp.net/api/lol/static-data/na/v1.2/champion?champData=blurb,image&api_key=f22328ae-229c-43eb-bda0-83c091d7cafa")
+                .url("https://global.api.pvp.net/api/lol/static-data/na/v1.2/champion?champData=blurb,image&api_key=?")
                 .build();
 
         Response response = null;
         try {
             response = okHttpClient.newCall(request).execute();
+            
             return response.body().string();
         } catch (IOException e) {
             e.printStackTrace();

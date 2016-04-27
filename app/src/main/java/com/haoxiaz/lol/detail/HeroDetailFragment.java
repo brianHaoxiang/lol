@@ -38,6 +38,11 @@ public class HeroDetailFragment extends Fragment {
     }
 
     public void setHeroInformation(Champion champion) {
+        if (champion == null) {
+            detailView.setVisibility(View.GONE);
+            return;
+        }
+        detailView.setVisibility(View.VISIBLE);
         this.champion = champion;
         TextView name = (TextView) detailView.findViewById(R.id.champion_name);
         name.setText(champion.getName());
